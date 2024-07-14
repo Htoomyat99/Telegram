@@ -15,7 +15,6 @@ export default function UserScreens() {
         .select("*")
         .neq("id", user?.id);
 
-      console.log("data >>>", data);
       setUsers(data);
     };
 
@@ -25,7 +24,7 @@ export default function UserScreens() {
   return (
     <FlatList
       data={users}
-      renderItem={({ item }) => <UsersListItem item={item} />}
+      renderItem={({ item }) => <UsersListItem user={item} />}
       ListEmptyComponent={<ActivityIndicator />}
     />
   );
