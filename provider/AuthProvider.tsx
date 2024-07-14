@@ -11,15 +11,18 @@ import {
 interface TAuth {
   session: Session | null;
   user: User | null;
+  profile: any | null;
 }
 
 export const AuthContext = createContext<TAuth>({
   session: null,
   user: null,
+  profile: null,
 });
 
 export default function AuthProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<any | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -31,9 +34,28 @@ export default function AuthProvider({ children }: PropsWithChildren) {
     });
   }, []);
 
+  useEffect(() => {
+    if (!session?.user) {
+      setProfile(null);
+      return;
+    }
+
+    const fetchProfile = async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", session.user.id)
+        .single();
+
+      setProfile(data);
+    };
+
+    fetchProfile();
+  }, [session?.user]);
+
   return (
     <AuthContext.Provider
-      value={{ session, user: session ? session.user : null }}
+      value={{ session, user: session ? session.user : null, profile }}
     >
       {children}
     </AuthContext.Provider>
